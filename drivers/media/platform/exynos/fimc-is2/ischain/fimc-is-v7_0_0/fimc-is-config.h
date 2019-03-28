@@ -204,4 +204,6 @@
 #define INIT_AWB_COUNT_REAR	(3)
 #define INIT_AWB_COUNT_FRONT	(8)
 
+#define CHAIN_USE_VC_TASKLET	1
+
 #endif

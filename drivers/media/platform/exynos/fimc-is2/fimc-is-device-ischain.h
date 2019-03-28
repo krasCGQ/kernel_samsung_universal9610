@@ -72,6 +72,7 @@ enum fimc_is_ischain_state {
 	FIMC_IS_ISCHAIN_POWER_ON,
 	FIMC_IS_ISCHAIN_OPEN_STREAM,
 	FIMC_IS_ISCHAIN_REPROCESSING,
+	FIMC_IS_ISCHAIN_MODE_CHANGED,
 };
 
 enum fimc_is_camera_device {

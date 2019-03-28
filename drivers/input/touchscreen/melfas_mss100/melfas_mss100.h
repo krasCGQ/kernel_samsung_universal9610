@@ -186,7 +186,7 @@ static struct delayed_work *p_ghost_check;
 #define MMS_GESTURE_ID_FOD_LONG			0x00
 #define MMS_GESTURE_ID_FOD_NORMAL			0x01
 #define MMS_GESTURE_ID_FOD_RELEASE	0x02
-
+#define MMS_GESTURE_ID_FOD_OUT	0x03
 
 typedef enum {
 	SPONGE_EVENT_TYPE_SPAY			= 0x04,
@@ -195,7 +195,8 @@ typedef enum {
 	SPONGE_EVENT_TYPE_AOD_LONGPRESS		= 0x0A,
 	SPONGE_EVENT_TYPE_AOD_DOUBLETAB		= 0x0B,
 	SPONGE_EVENT_TYPE_FOD		= 0x0F,
-	SPONGE_EVENT_TYPE_FOD_RELEASE		= 0x10
+	SPONGE_EVENT_TYPE_FOD_RELEASE		= 0x10,
+	SPONGE_EVENT_TYPE_FOD_OUT = 0x11
 } SPONGE_EVENT_TYPE;
 
 #define SPONGE_AOD_ENABLE_OFFSET 0x00
@@ -302,11 +303,9 @@ struct mms_ts_info {
 	u8 node_x;
 	u8 node_y;
 	u8 node_key;
-	u8 boot_ver_ic;
-	u8 core_ver_ic;
-	u8 config_ver_ic;
 	u16 fw_ver_ic;
 	u16 fw_ver_bin[8];
+	u16 fw_model_ver_ic;
 	u8 event_size;
 	int event_format;
 	u16 fw_year;
@@ -382,6 +381,7 @@ struct mms_ts_info {
 	unsigned int comm_err_count;
 
 	int open_short_type;
+	int open_short_result;
 	bool use_sponge;
 
 	u32 defect_probability;
@@ -404,7 +404,6 @@ struct mms_devicetree_data {
 	const char *gpio_io_en;
 	int gpio_sda;
 	int gpio_scl;
-	int panel;
 	int bringup;
 	struct regulator *vdd_io;
 	const char *fw_name;

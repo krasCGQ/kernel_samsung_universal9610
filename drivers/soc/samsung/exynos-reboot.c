@@ -284,7 +284,6 @@ static void exynos_reboot(enum reboot_mode mode, const char *cmd)
 	case EXYNOS9810_SOC_ID:
 		/* Check reset_sequencer_configuration register */
 		if (readl(exynos_pmu_base + RESET_SEQUENCER_CONFIGURATION) & DFD_EDPCSR_DUMP_EN) {
-			big_reset_control(0);
 			dfd_set_dump_gpr(0);
 		}
 		if (revision < EXYNOS_MAIN_REV_1) {
@@ -297,7 +296,6 @@ static void exynos_reboot(enum reboot_mode mode, const char *cmd)
 	case EXYNOS9610_SOC_ID:
 		/* Check reset_sequencer_configuration register */
 		if (readl(exynos_pmu_base + RESET_SEQUENCER_CONFIGURATION) & DFD_EDPCSR_DUMP_EN) {
-			big_reset_control(0);
 			dfd_set_dump_gpr(0);
 		}
 		break;
@@ -327,7 +325,7 @@ static int __init exynos_reboot_setup(struct device_node *np)
 	of_node_put(np);
 
 	pr_info("[Exynos Reboot]: Success to register arm_pm_restart\n");
-	big_reset_control(1);
+	big_reset_control(0);
 	return err;
 }
 

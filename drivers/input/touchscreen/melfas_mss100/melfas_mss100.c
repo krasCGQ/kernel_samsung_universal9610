@@ -521,6 +521,7 @@ int mms_get_fw_version(struct mms_ts_info *info, u8 *ver_buf)
 		ver_buf[i] = rbuf[i];
 	}
 
+	info->fw_model_ver_ic = (ver_buf[4] << 8 | ver_buf[5]);
 	info->fw_ver_ic = (ver_buf[6] << 8 | ver_buf[7]);
 
 	input_info(true, &info->client->dev,
@@ -842,7 +843,8 @@ int mms_fw_update_from_kernel(struct mms_ts_info *info, bool force)
 
 	mms_get_fw_version(info, rbuf);
 
-	if (rbuf[6] == 0x01)
+	/* for B-ITO panel */
+	if (rbuf[5] == 0x11 && rbuf[6] == 0x01)
 		fw_name = info->dtdata->fw_name_old;
 
 	//Get firmware
@@ -1129,7 +1131,7 @@ static int mms_init_config(struct mms_ts_info *info)
 
 	for (retry = 0 ; retry < 3; ++retry) {
 		ret = mms_i2c_read(info, wbuf, 2, rbuf, 7);
-		tmp = rbuf[4] | rbuf[5] | rbuf[6];
+		tmp = (rbuf[4] & rbuf[5]) | rbuf[6];
 
 		if (ret || tmp == 0 || tmp == 0xFF) {
 			input_err(true, &info->client->dev,
@@ -1172,7 +1174,7 @@ static int mms_init_config(struct mms_ts_info *info)
 
 	for (retry = 0 ; retry < 3; ++retry) {
 		ret = mms_i2c_read(info, wbuf, 2, rbuf, 3);
-		tmp = rbuf[0] | rbuf[1] | rbuf[2];
+		tmp = (rbuf[0] | rbuf[1]) & rbuf[2];
 
 		if (ret || tmp == 0 || tmp == 0xFF) {
 			input_err(true, &info->client->dev,
@@ -1198,7 +1200,7 @@ static int mms_init_config(struct mms_ts_info *info)
 	/* sponge fod info */
 	for (retry = 0 ; retry < 3; ++retry) {
 		ret = sponge_read(info, SPONGE_FOD_INFO, rbuf, 3);
-		tmp = rbuf[0] | rbuf[1] | rbuf[2];
+		tmp = rbuf[0] & rbuf[1] & rbuf[2];
 
 		if (ret < 0 || tmp == 0 || tmp == 0xFF) {
 			input_err(true, &info->client->dev,
@@ -1232,6 +1234,15 @@ static void mms_run_rawdata(struct mms_ts_info *info, bool on_probe)
 	info->tsp_dump_lock = 1;
 	input_raw_data_clear();
 	input_raw_info(true, &info->client->dev, "%s: start ##\n", __func__);
+
+	input_raw_info(true, &info->client->dev, "%s - max_x[%d] max_y[%d]\n",
+		__func__, info->max_x, info->max_y);
+	input_raw_info(true, &info->client->dev, "%s - node_x[%d] node_y[%d] node_key[%d]\n",
+		__func__, info->node_x, info->node_y, info->node_key);
+	input_raw_info(true, &info->client->dev, "%s event_format[%d] event_size[%d]\n",
+				__func__, info->event_format, info->event_size);
+	input_raw_info(true, &info->client->dev, "%s fod_tx[%d] fod_rx[%d] fod_vi_size[%d]\n",
+				__func__, info->fod_tx, info->fod_rx, info->fod_vi_size);
 
 	if (!on_probe) {
 		if (mms_get_image(info, MIP_IMG_TYPE_INTENSITY)) {

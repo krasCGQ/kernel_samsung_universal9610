@@ -174,6 +174,8 @@ int fimc_is_hw_3aa_mode_change(struct fimc_is_hw_ip *hw_ip, u32 instance, ulong 
 
 	FIMC_BUG(!hw_ip->group[instance]);
 
+	set_bit(FIMC_IS_ISCHAIN_MODE_CHANGED, &hw_ip->group[instance]->device->state);
+
 	if (test_bit(FIMC_IS_GROUP_OTF_INPUT, &hw_ip->group[instance]->state)) {
 		/* For sensor info initialize for mode change */
 		framemgr = hw_ip->framemgr;

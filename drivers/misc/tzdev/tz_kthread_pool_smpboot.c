@@ -30,6 +30,7 @@
 #include "tzdev.h"
 #include "tzlog.h"
 #include "tz_iwservice.h"
+#include "tz_kthread_pool.h"
 #include "tz_mem.h"
 
 enum {
@@ -62,11 +63,6 @@ static int tz_kthread_pool_should_wake(unsigned long cpu)
 		return KTHREAD_SHOULD_STOP;
 	}
 
-	if (kthread_should_park()) {
-		tzdev_kthread_info("Requested kthread park on cpu = %lx\n", cpu);
-		return KTHREAD_SHOULD_PARK;
-	}
-
 	sk_cpu_mask = tz_iwservice_get_cpu_mask();
 
 	cpumask_copy(&requested_cpu_mask, to_cpumask(&sk_cpu_mask));
@@ -81,6 +77,14 @@ static int tz_kthread_pool_should_wake(unsigned long cpu)
 			cpumask_pr_args(&cpu_mask));
 	tzdev_kthread_info("cpu mask outstanding = %*pb\n",
 			cpumask_pr_args(&outstanding_cpu_mask));
+
+	if (kthread_should_park()) {
+		if (cpu_isset(cpu, cpu_mask))
+			tz_kthread_pool_cmd_send();
+
+		tzdev_kthread_info("Requested kthread park on cpu = %lx\n", cpu);
+		return KTHREAD_SHOULD_PARK;
+	}
 
 	if (cpu_isset(cpu, cpu_mask)) {
 		tzdev_kthread_debug("Direct cpu hit = %lu\n", cpu);

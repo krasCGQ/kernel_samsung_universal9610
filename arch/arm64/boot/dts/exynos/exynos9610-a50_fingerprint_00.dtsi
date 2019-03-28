@@ -91,7 +91,8 @@
 		etspi-sleepPin = <&gpg3 0 0>;
 		etspi-ldoPin = <&gpg2 7 0x00>;
 		etspi-chipid = "ET711";
-		etspi-position = "13.77,0.00,7.29,7.29,14.80,14.80,12.50,12.50,5.00";
+		etspi-modelinfo = "A505";
+		etspi-position = "13.77,0.00,7.29,7.29,14.80,14.80,12.00,12.00,5.00";
 		controller-data {
 			cs-gpio = <&gpp2 7 0>;
 			samsung,spi-feedback-delay = <0>;

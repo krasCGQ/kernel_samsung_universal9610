@@ -67,7 +67,7 @@ void get_timestamp(struct ssp_data *data, char *dataframe,
 
 	data->latest_timestamp[type] = timestamp_ns;
 	if (data->latest_timestamp[type] > current_timestamp) {
-		ssp_infof("future timestamp(%d) : last = %lld, cur = %lld", type, data->latest_timestamp[type], current_timestamp);
+		//ssp_infof("future timestamp(%d) : last = %lld, cur = %lld", type, data->latest_timestamp[type], current_timestamp);
 		data->latest_timestamp[type] = current_timestamp;
 	} 
 	event->timestamp = data->latest_timestamp[type];

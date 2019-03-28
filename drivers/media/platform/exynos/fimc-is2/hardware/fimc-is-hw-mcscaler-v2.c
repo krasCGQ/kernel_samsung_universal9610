@@ -744,7 +744,7 @@ static int fimc_is_hw_mcsc_shot(struct fimc_is_hw_ip *hw_ip, struct fimc_is_fram
 	struct is_param_region *param;
 	struct mcs_param *mcs_param;
 	bool start_flag = true;
-	u32 lindex, hindex, instance;
+	u32 instance;
 	struct fimc_is_hw_mcsc_cap *cap = GET_MCSC_HW_CAP(hw_ip);
 	ulong flag;
 
@@ -794,17 +794,11 @@ static int fimc_is_hw_mcsc_shot(struct fimc_is_hw_ip *hw_ip, struct fimc_is_fram
 		goto config;
 	}
 
-	lindex = frame->shot->ctl.vendor_entry.lowIndexParam;
-	hindex = frame->shot->ctl.vendor_entry.highIndexParam;
-
 	hw_mcsc->back_param = param;
-	hw_mcsc->back_lindex = lindex;
-	hw_mcsc->back_hindex = hindex;
 
 	spin_lock_irqsave(&mcsc_out_slock, flag);
 
-	fimc_is_hw_mcsc_update_param(hw_ip, mcs_param,
-		lindex, hindex, instance);
+	fimc_is_hw_mcsc_update_param(hw_ip, mcs_param, instance);
 
 	spin_unlock_irqrestore(&mcsc_out_slock, flag);
 
@@ -939,11 +933,10 @@ int fimc_is_hw_mcsc_update_register(struct fimc_is_hw_ip *hw_ip,
 }
 
 int fimc_is_hw_mcsc_update_param(struct fimc_is_hw_ip *hw_ip,
-	struct mcs_param *param, u32 lindex, u32 hindex, u32 instance)
+	struct mcs_param *param, u32 instance)
 {
 	int i = 0;
 	int ret = 0;
-	bool control_cmd = false;
 	struct fimc_is_hw_mcsc *hw_mcsc;
 	u32 dma_output_ids = 0;
 	u32 hwfc_output_ids = 0;
@@ -956,28 +949,20 @@ int fimc_is_hw_mcsc_update_param(struct fimc_is_hw_ip *hw_ip,
 	hw_mcsc = (struct fimc_is_hw_mcsc *)hw_ip->priv_info;
 
 	if (hw_mcsc->instance != instance) {
-		control_cmd = true;
-		msdbg_hw(2, "update_param: hw_ip->instance(%d), control_cmd(%d)\n",
-			instance, hw_ip, hw_mcsc->instance, control_cmd);
+		msdbg_hw(2, "update_param: hw_ip->instance(%d)\n",
+			instance, hw_ip, hw_mcsc->instance);
+		hw_mcsc->instance = instance;
 	}
 
-	if (control_cmd || (lindex & LOWBIT_OF(PARAM_MCS_INPUT))
-		|| (hindex & HIGHBIT_OF(PARAM_MCS_INPUT))
-		|| (test_bit(MCSC_RST_CHK, &mcsc_out_st))) {
-		ret = fimc_is_hw_mcsc_otf_input(hw_ip, &param->input, instance);
-		ret = fimc_is_hw_mcsc_dma_input(hw_ip, &param->input, instance);
-	}
+	ret |= fimc_is_hw_mcsc_otf_input(hw_ip, &param->input, instance);
+	ret |= fimc_is_hw_mcsc_dma_input(hw_ip, &param->input, instance);
 
 	fimc_is_hw_mcsc_update_djag_register(hw_ip, param, instance);	/* for DZoom */
 
 	for (i = MCSC_OUTPUT0; i < cap->max_output; i++) {
-		if (control_cmd || (lindex & LOWBIT_OF((i + PARAM_MCS_OUTPUT0)))
-				|| (hindex & HIGHBIT_OF((i + PARAM_MCS_OUTPUT0)))
-				|| (test_bit(MCSC_RST_CHK, &mcsc_out_st))) {
-			ret = fimc_is_hw_mcsc_update_register(hw_ip, param, i, instance);
-			fimc_is_scaler_set_wdma_pri(hw_ip->regs, i, param->output[i].plane);	/* FIXME: */
+		ret |= fimc_is_hw_mcsc_update_register(hw_ip, param, i, instance);
+		fimc_is_scaler_set_wdma_pri(hw_ip->regs, i, param->output[i].plane);	/* FIXME: */
 
-		}
 		/* check the hwfc enable in all output */
 		if (param->output[i].hwfc)
 			hwfc_output_ids |= (1 << i);
@@ -987,7 +972,7 @@ int fimc_is_hw_mcsc_update_param(struct fimc_is_hw_ip *hw_ip,
 	}
 
 	/* setting for hwfc */
-	ret = fimc_is_hw_mcsc_hwfc_mode(hw_ip, &param->input, hwfc_output_ids, dma_output_ids, instance);
+	ret |= fimc_is_hw_mcsc_hwfc_mode(hw_ip, &param->input, hwfc_output_ids, dma_output_ids, instance);
 
 	hw_mcsc->prev_hwfc_output_ids = hwfc_output_ids;
 
@@ -2867,7 +2852,6 @@ int fimc_is_hw_mcsc_restore(struct fimc_is_hw_ip *hw_ip, u32 instance)
 	int ret = 0;
 	struct fimc_is_hw_mcsc *hw_mcsc;
 	struct is_param_region *param;
-	u32 lindex, hindex;
 
 	BUG_ON(!hw_ip);
 
@@ -2876,13 +2860,10 @@ int fimc_is_hw_mcsc_restore(struct fimc_is_hw_ip *hw_ip, u32 instance)
 	fimc_is_hw_mcsc_reset(hw_ip);
 
 	param = hw_mcsc->back_param;
-	lindex = hw_mcsc->back_lindex;
-	hindex = hw_mcsc->back_hindex;
 	param->tpu.config.tdnr_bypass = true;
 
 	/* setting for MCSC */
-	fimc_is_hw_mcsc_update_param(hw_ip, &param->mcs,
-			lindex, hindex, instance);
+	fimc_is_hw_mcsc_update_param(hw_ip, &param->mcs, instance);
 	info_hw("[RECOVERY]: mcsc update param\n");
 
 	/* setting for TDNR */

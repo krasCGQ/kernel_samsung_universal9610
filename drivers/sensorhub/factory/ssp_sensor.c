@@ -23,7 +23,7 @@
 /*************************************************************************/
 
 #define MODEL_NAME      "CHUB_EXYNOS9610"
-#define SSP_FIRMWARE_REVISION       	19021400
+#define SSP_FIRMWARE_REVISION       	19031400
 
 #define FACTORY_DATA_MAX        100
 static char buffer[FACTORY_DATA_MAX];

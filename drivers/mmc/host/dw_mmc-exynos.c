@@ -229,7 +229,9 @@ static void dw_mci_exynos_ssclk_control(struct dw_mci *host, int enable)
 	if (!(host->pdata->quirks & DW_MCI_QUIRK_USE_SSC))
 		return;
 
-	pm_qos_update_request(&host->pm_qos_mif_lock, host->pdata->qos_dvfs_mif_level);
+	if (host->pdata->qos_dvfs_mif_level)
+		pm_qos_update_request(&host->pm_qos_mif_lock,
+				host->pdata->qos_dvfs_mif_level);
 
 	if (enable) {
 		if (cal_pll_mmc_check() == true)
@@ -260,7 +262,8 @@ static void dw_mci_exynos_ssclk_control(struct dw_mci *host, int enable)
 		}
 	}
 out:
-	pm_qos_update_request(&host->pm_qos_mif_lock, 0);
+	if (host->pdata->qos_dvfs_mif_level)
+		pm_qos_update_request(&host->pm_qos_mif_lock, 0);
 }
 
 static void dw_mci_exynos_set_clksel_timing(struct dw_mci *host, u32 timing)
@@ -400,7 +403,15 @@ static void dw_mci_exynos_adjust_clock(struct dw_mci *host, unsigned int wanted)
 			return;
 	}
 
+	if (host->pdata->qos_dvfs_mif_level)
+		pm_qos_update_request(&host->pm_qos_mif_lock,
+				host->pdata->qos_dvfs_mif_level);
+
 	ret = clk_set_rate(host->ciu_clk, wanted * div);
+
+	if (host->pdata->qos_dvfs_mif_level)
+		pm_qos_update_request(&host->pm_qos_mif_lock, 0);
+
 	if (ret)
 		dev_warn(host->dev, "failed to set clk-rate %u error: %d\n", wanted * div, ret);
 	actual = clk_get_rate(host->ciu_clk);

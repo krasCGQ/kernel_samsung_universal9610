@@ -2462,24 +2462,24 @@ static unsigned char DYNAMIC_UI_4[] = {
 static unsigned char DYNAMIC_UI_5[] = {
 	0xB1, // CRC, BLF
 	0x00, // crc_bypass
-	0xaf, // crc_lut_mode1_rr
+	0xb6, // crc_lut_mode1_rr
 	0x00, // crc_lut_mode1_rg
 	0x00, // crc_lut_mode1_rb
-	0x12, // crc_lut_mode1_gr
-	0xca, // crc_lut_mode1_gg
+	0x1e, // crc_lut_mode1_gr
+	0xff, // crc_lut_mode1_gg
 	0x00, // crc_lut_mode1_gb
 	0x06, // crc_lut_mode1_br
 	0x05, // crc_lut_mode1_bg
-	0xc8, // crc_lut_mode1_bb
-	0x22, // crc_lut_mode1_cr
-	0xea, // crc_lut_mode1_cg
-	0xdc, // crc_lut_mode1_cb
-	0xd8, // crc_lut_mode1_mr
+	0xca, // crc_lut_mode1_bb
+	0x20, // crc_lut_mode1_cr
+	0xf0, // crc_lut_mode1_cg
+	0xe0, // crc_lut_mode1_cb
+	0xda, // crc_lut_mode1_mr
 	0x00, // crc_lut_mode1_mg
 	0xd6, // crc_lut_mode1_mb
-	0xd0, // crc_lut_mode1_yr
-	0xd0, // crc_lut_mode1_yg
-	0x16, // crc_lut_mode1_yb
+	0xda, // crc_lut_mode1_yr
+	0xd6, // crc_lut_mode1_yg
+	0x00, // crc_lut_mode1_yb
 	0xff, // crc_lut_mode1_wr
 	0xfa, // crc_lut_mode1_wg
 	0xf0, // crc_lut_mode1_wb
@@ -2707,7 +2707,7 @@ static unsigned char STANDARD_UI_5[] = {
 	0x01, // crc_lut_mode1_rg
 	0x06, // crc_lut_mode1_rb
 	0x00, // crc_lut_mode1_gr
-	0xca, // crc_lut_mode1_gg
+	0xff, // crc_lut_mode1_gg
 	0x00, // crc_lut_mode1_gb
 	0x05, // crc_lut_mode1_br
 	0x05, // crc_lut_mode1_bg
@@ -2948,7 +2948,7 @@ static unsigned char NATURAL_UI_5[] = {
 	0x00, // crc_lut_mode1_rg
 	0x04, // crc_lut_mode1_rb
 	0x43, // crc_lut_mode1_gr
-	0xd2, // crc_lut_mode1_gg
+	0xff, // crc_lut_mode1_gg
 	0x11, // crc_lut_mode1_gb
 	0x05, // crc_lut_mode1_br
 	0x06, // crc_lut_mode1_bg
@@ -3193,7 +3193,7 @@ static unsigned char AUTO_UI_5[] = {
 	0x00, // crc_lut_mode1_gb
 	0x00, // crc_lut_mode1_br
 	0x00, // crc_lut_mode1_bg
-	0xf5, // crc_lut_mode1_bb
+	0xff, // crc_lut_mode1_bb
 	0x00, // crc_lut_mode1_cr
 	0xff, // crc_lut_mode1_cg
 	0xff, // crc_lut_mode1_cb
@@ -3436,9 +3436,9 @@ static unsigned char AUTO_GALLERY_5[] = {
 	0x00, // crc_lut_mode1_gb
 	0x00, // crc_lut_mode1_br
 	0x00, // crc_lut_mode1_bg
-	0xf5, // crc_lut_mode1_bb
+	0xff, // crc_lut_mode1_bb
 	0x00, // crc_lut_mode1_cr
-	0xff, // crc_lut_mode1_cg
+	0xf0, // crc_lut_mode1_cg
 	0xff, // crc_lut_mode1_cb
 	0xff, // crc_lut_mode1_mr
 	0x00, // crc_lut_mode1_mg
@@ -3565,34 +3565,34 @@ static unsigned char AUTO_GALLERY_6[] = {
 	0xB3, // ACE , TCS, ORE
 	0xc4, // skin_boundary_parameter
 	0x0f,
-	0x35,
+	0x7f,
 	0x00,
+	0x00,
+	0x03,
+	0x40,
+	0x00,
+	0x00,
+	0x02,
+	0x00,
+	0xff,
+	0x00,
+	0x80,
+	0x28,
+	0x7e,
+	0x00,
+	0xff,
 	0x00,
 	0x04,
-	0x35,
+	0x93,
+	0x7a,
 	0x00,
-	0x00,
-	0x04,
-	0x0d,
-	0xf5,
-	0x00,
-	0x81,
-	0x1a,
-	0x60,
-	0x00,
-	0xb6,
-	0x00,
-	0x15,
-	0x1c,
-	0x3c,
-	0x05,
-	0xd1,
-	0x05,
-	0xd4,
+	0x2f,
+	0x02,
+	0x08,
 	0x64,
-	0x70, // Skin Color Gain (0x00 ~ 0xFF)
-	0x7c, // Target Skin Color (Cb)
-	0x88, // Target Skin Color (Cr)
+	0x20, // Skin Color Gain (0x00 ~ 0xFF)
+	0x8a, // Target Skin Color (Cb)
+	0x80, // Target Skin Color (Cr)
 	0x00, // Threshold Value of Skin Color Detection
 	0x32, // Minumum Y of Skin Brightness Control
 	0xdc, // Maximum Y of Skin Brightness Control
@@ -3683,9 +3683,9 @@ static unsigned char AUTO_CAMERA_5[] = {
 	0x00, // crc_lut_mode1_gb
 	0x00, // crc_lut_mode1_br
 	0x00, // crc_lut_mode1_bg
-	0xf5, // crc_lut_mode1_bb
+	0xff, // crc_lut_mode1_bb
 	0x00, // crc_lut_mode1_cr
-	0xff, // crc_lut_mode1_cg
+	0xf0, // crc_lut_mode1_cg
 	0xff, // crc_lut_mode1_cb
 	0xff, // crc_lut_mode1_mr
 	0x00, // crc_lut_mode1_mg
@@ -3812,34 +3812,34 @@ static unsigned char AUTO_CAMERA_6[] = {
 	0xB3, // ACE , TCS, ORE
 	0xc4, // skin_boundary_parameter
 	0x0f,
-	0x35,
+	0x7f,
 	0x00,
+	0x00,
+	0x03,
+	0x40,
+	0x00,
+	0x00,
+	0x02,
+	0x00,
+	0xff,
+	0x00,
+	0x80,
+	0x28,
+	0x7e,
+	0x00,
+	0xff,
 	0x00,
 	0x04,
-	0x35,
+	0x93,
+	0x7a,
 	0x00,
-	0x00,
-	0x04,
-	0x0d,
-	0xf5,
-	0x00,
-	0x81,
-	0x1a,
-	0x60,
-	0x00,
-	0xb6,
-	0x00,
-	0x15,
-	0x1c,
-	0x3c,
-	0x05,
-	0xd1,
-	0x05,
-	0xd4,
+	0x2f,
+	0x02,
+	0x08,
 	0x64,
-	0x70, // Skin Color Gain (0x00 ~ 0xFF)
-	0x7c, // Target Skin Color (Cb)
-	0x88, // Target Skin Color (Cr)
+	0x20, // Skin Color Gain (0x00 ~ 0xFF)
+	0x8a, // Target Skin Color (Cb)
+	0x80, // Target Skin Color (Cr)
 	0x00, // Threshold Value of Skin Color Detection
 	0x32, // Minumum Y of Skin Brightness Control
 	0xdc, // Maximum Y of Skin Brightness Control
@@ -3928,7 +3928,7 @@ static unsigned char AUTO_EBOOK_5[] = {
 	0x00, // crc_lut_mode1_gb
 	0x00, // crc_lut_mode1_br
 	0x00, // crc_lut_mode1_bg
-	0xf5, // crc_lut_mode1_bb
+	0xff, // crc_lut_mode1_bb
 	0x00, // crc_lut_mode1_cr
 	0xff, // crc_lut_mode1_cg
 	0xff, // crc_lut_mode1_cb
@@ -4169,7 +4169,7 @@ static unsigned char AUTO_EMAIL_5[] = {
 	0x00, // crc_lut_mode1_gb
 	0x00, // crc_lut_mode1_br
 	0x00, // crc_lut_mode1_bg
-	0xf5, // crc_lut_mode1_bb
+	0xff, // crc_lut_mode1_bb
 	0x00, // crc_lut_mode1_cr
 	0xff, // crc_lut_mode1_cg
 	0xff, // crc_lut_mode1_cb

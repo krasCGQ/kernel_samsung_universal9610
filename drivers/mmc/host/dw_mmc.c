@@ -288,8 +288,7 @@ static void dw_mci_qos_work(struct work_struct *work)
 	struct dw_mci *host = container_of(work, struct dw_mci, qos_work.work);
 
 	pm_qos_update_request(&host->pm_qos_int_lock, 0);
-
-	if (host->ssc_check)
+	if (host->pdata->qos_dvfs_mif_level)
 		pm_qos_update_request(&host->pm_qos_mif_lock, 0);
 }
 
@@ -301,7 +300,7 @@ static void dw_mci_qos_get(struct dw_mci *host)
 	pm_qos_update_request(&host->pm_qos_int_lock,
 			host->pdata->qos_dvfs_int_level);
 
-	if (host->ssc_check)
+	if (host->pdata->qos_dvfs_mif_level)
 		pm_qos_update_request(&host->pm_qos_mif_lock,
 				host->pdata->qos_dvfs_mif_level);
 }

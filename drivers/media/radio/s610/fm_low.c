@@ -1370,7 +1370,7 @@ void fm_sx_reset(void)
 
 	/* Reset the FM_SX registers */
 	if (gradio->rfchip_ver == S620_REV_0) {
-		fmspeedy_set_reg(0xFFF240, 0x00302A);
+		fmspeedy_set_reg(0xFFF240, 0x00B03E);
 		fmspeedy_set_reg(0xFFF241, 0x004600);
 		fmspeedy_set_reg(0xFFF242, 0x27365E);
 		fmspeedy_set_reg(0xFFF243, 0x10BDC8);
@@ -1388,7 +1388,7 @@ void fm_sx_reset(void)
 		fmspeedy_set_reg(0xFFF250, 0);
 		fmspeedy_set_reg(0xFFF251, 0x2C0000);
 		fmspeedy_set_reg(0xFFF252, 0x040000);
-		fmspeedy_set_reg(0xFFF253, 0x00883C);
+		fmspeedy_set_reg(0xFFF253, 0x008840);
 	} else {
 		fmspeedy_set_reg(0xFFF240, 0x009020);
 		fmspeedy_set_reg(0xFFF241, 0x004600);
@@ -1419,14 +1419,14 @@ void fm_sx_start(void)
 	API_ENTRY(gradio);
 
 	if (gradio->rfchip_ver == S620_REV_0) {
-		fmspeedy_set_reg(0xFFF253, 0x0F883C);
+		fmspeedy_set_reg(0xFFF253, 0x0F8840);
 		udelay(50);
 
-		fmspeedy_set_reg(0xFFF240, 0x3C302A);
+		fmspeedy_set_reg(0xFFF240, 0x3CB03E);
 		udelay(20);
 
-		fmspeedy_set_reg(0xFFF253, 0x0B883C);
-		fmspeedy_set_reg(0xFFF240, 0x14302A);
+		fmspeedy_set_reg(0xFFF253, 0x0F8840);
+		fmspeedy_set_reg(0xFFF240, 0x14B03E);
 	} else {
 		fmspeedy_set_reg(0xFFF253, 0x0F883C);
 		udelay(50);
@@ -1492,7 +1492,7 @@ bool fm_aux_pll_initialize(void)
 	fmspeedy_set_reg_field(0xFFF257, 7, (0x0001<<7), 0); /* PLL1_SEL_CONTROL, default = 0 */
 	fmspeedy_set_reg_field(0xFFF257, 6, (0x0001<<6), 0); /* PLL1_SEL_BW_TYP, default = 0 */
 	fmspeedy_set_reg_field(0xFFF257, 9, (0x0003<<9), 1); /* PLL1_VCO_TUNE, default = 0 */
-	fmspeedy_set_reg_field(0xFFF257, 8, (0x0001<<8), 1); /* PLL1_SEL_HP, default = 0 */
+	fmspeedy_set_reg_field(0xFFF257, 8, (0x0001<<8), 0); /* PLL1_SEL_HP, default = 0 */
 	fmspeedy_set_reg_field(0xFFF257, 15, (0x00FF<<15), 12); /* PLL2_FB_DIV, default = 0 */
 	fmspeedy_set_reg_field(0xFFF257, 27, (0x0003<<27), 3); /* PLL2_LOCK_OUT, default = 0 */
 	fmspeedy_set_reg_field(0xFFF257, 25, (0x0003<<25), 3); /* _PLL2_LOCK_IN, default = 0 */
@@ -1500,7 +1500,7 @@ bool fm_aux_pll_initialize(void)
 	fmspeedy_set_reg_field(0xFFF257, 12, (0x0007<<12), 4); /* PLL2_CPCBUS, default = 0 */
 	fmspeedy_set_reg_field(0xFFF257, 11, (0x0001<<11), 0); /* PLL2_BYPASS, default = 0 */
 #else
-	fmspeedy_set_reg(0xFFF257, 0x1F864301);
+	fmspeedy_set_reg(0xFFF257, 0x1F864201);
 #endif
 
 #if 0

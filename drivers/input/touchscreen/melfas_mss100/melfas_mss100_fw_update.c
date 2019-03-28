@@ -439,7 +439,11 @@ int mip4_ts_flash_fw(struct mms_ts_info *info, const u8 *fw_data, size_t fw_size
 				}
 			}
 
-			if (ver_chip[5] == 0xFF || ver_chip[6] == 0xFF) {
+			/* ver_chip[5]: model version 
+			** TO DO **
+			** delete ver_chip[5] == 0x12 (a30 ver)
+			*/
+			if (ver_chip[5] == 0xFF || ver_chip[6] == 0xFF || ver_chip[5] == 0x12) {
 				input_err(true, &info->client->dev, "%s: crc error\n", __func__);
 				goto update;
 			}

@@ -829,21 +829,32 @@ static long etspi_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 #endif
 
 	case FP_SENSOR_ORIENT:
-		pr_info("%s: orient is %d", __func__, etspi->orient);
+		pr_info("%s: orient is %d\n", __func__, etspi->orient);
 
 		retval = put_user(etspi->orient, (u8 __user *) (uintptr_t)ioc->rx_buf);
 		if (retval != 0)
 			pr_err("%s FP_SENSOR_ORIENT put_user fail: %d\n",
 											__func__, retval);
+		break;
 
 	case FP_SPI_VALUE:
 		etspi->spi_value = ioc->len;
 		pr_info("%s spi_value: 0x%x\n", __func__, etspi->spi_value);
-			break;
+		break;
+
+	case FP_MODEL_INFO:
+		pr_info("%s: modelinfo is %s\n", __func__, etspi->model_info);
+
+		retval = copy_to_user((u8 __user *) (uintptr_t)ioc->rx_buf,
+												etspi->model_info, 10);
+		if (retval != 0)
+			pr_err("%s FP_IOCTL_MODEL_INFO copy_to_user failed: %d\n",
+											__func__, retval);
+		break;
 
 	case FP_IOCTL_RESERVED_01:
 	case FP_IOCTL_RESERVED_02:
-			break;
+		break;
 
 	default:
 		retval = -EFAULT;
@@ -1000,9 +1011,11 @@ int etspi_platformInit(struct etspi_data *etspi)
 		}
 
 		if (etspi->sleepPin)
-			pr_info("%s sleep value =%d\n", __func__, gpio_get_value(etspi->sleepPin));
+			pr_info("%s sleep value =%d\n", __func__,
+					gpio_get_value(etspi->sleepPin));
 		if (etspi->ldo_pin)
-			pr_info("%s ldo en value =%d\n", __func__, gpio_get_value(etspi->ldo_pin));
+			pr_info("%s ldo en value =%d\n", __func__,
+					gpio_get_value(etspi->ldo_pin));
 
 	} else {
 		status = -EFAULT;
@@ -1053,8 +1066,7 @@ void etspi_platformUninit(struct etspi_data *etspi)
 	}
 }
 
-static int etspi_parse_dt(struct device *dev,
-	struct etspi_data *data)
+static int etspi_parse_dt(struct device *dev, struct etspi_data *data)
 {
 	struct device_node *np = dev->of_node;
 	enum of_gpio_flags flags;
@@ -1102,6 +1114,12 @@ static int etspi_parse_dt(struct device *dev,
 		data->chipid = NULL;
 	}
 	pr_info("%s: chipid: %s\n", __func__, data->chipid);
+
+	if (of_property_read_string_index(np, "etspi-modelinfo", 0,
+			(const char **)&data->model_info)) {
+		data->model_info = "NONE";
+	}
+	pr_info("%s: modelinfo: %s\n", __func__, data->model_info);
 
 	if (of_property_read_string_index(np, "etspi-position", 0,
 			(const char **)&data->sensor_position)) {

@@ -2659,8 +2659,13 @@ int fimc_is_sec_write_phone_firmware(int id)
 		goto read_phone_fw_exit;
 	}
 
-	strncpy(phone_fw_version, temp_buf + nread - 11, FIMC_IS_HEADER_VER_SIZE);
-	strncpy(sysfs_pinfo[id].header_ver, temp_buf + nread - 11, FIMC_IS_HEADER_VER_SIZE);
+#ifdef USE_BINARY_PADDING_DATA_ADDED
+	strncpy(phone_fw_version, temp_buf + nread - (FIMC_IS_HEADER_VER_SIZE + FIMC_IS_SIGNATURE_SIZE), FIMC_IS_HEADER_VER_SIZE);
+	strncpy(sysfs_pinfo[id].header_ver, temp_buf + nread - (FIMC_IS_HEADER_VER_SIZE + FIMC_IS_SIGNATURE_SIZE), FIMC_IS_HEADER_VER_SIZE);
+#else
+	strncpy(phone_fw_version, temp_buf + nread - FIMC_IS_HEADER_VER_SIZE, FIMC_IS_HEADER_VER_SIZE);
+	strncpy(sysfs_pinfo[id].header_ver, temp_buf + nread - FIMC_IS_HEADER_VER_SIZE, FIMC_IS_HEADER_VER_SIZE);
+#endif
 	info("Camera[%d]: phone fw version: %s\n", id, phone_fw_version);
 
 read_phone_fw_exit:

@@ -132,6 +132,7 @@ struct sec_spi_info {
 #define FP_SPI_VALUE					0x1a
 #define FP_IOCTL_RESERVED_01			0x1b
 #define FP_IOCTL_RESERVED_02			0x1c
+#define FP_MODEL_INFO					0x1f
 /* trigger signal initial routine */
 #define INT_TRIGGER_INIT				0xa4
 /* trigger signal close routine */
@@ -226,6 +227,7 @@ struct etspi_data {
 	int detect_threshold;
 	bool finger_on;
 	const char *chipid;
+	const char *model_info;
 	const char *btp_vdd;
 	const char *sensor_position;
 	struct regulator *regulator_3p3;

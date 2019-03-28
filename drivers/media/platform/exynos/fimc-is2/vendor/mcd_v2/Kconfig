@@ -22,6 +22,12 @@ config AF_HOST_CONTROL
         default n
         help
           Enable host af control.
+config FIMC_IS_DDK_DATA_LOAD
+        bool "Enable signed binary processing."
+        depends on VENDER_MCD_V2
+        default n
+        help
+          Enable signed binary processing.
 config TORCH_CURRENT_CHANGE_SUPPORT
         bool "Change torch current in recording mode"
         depends on VENDER_MCD_V2

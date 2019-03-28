@@ -26,6 +26,6 @@
 #define AID_NET_BW_ACCT  KGIDT_INIT(3007)  /* change bandwidth statistics accounting */
 
 /* for Android P */
-#define AID_RESERVED_DISK	KGIDT_INIT(1065)
+#define AID_USE_ROOT_RESERVED KGIDT_INIT(5678)
 
 #endif

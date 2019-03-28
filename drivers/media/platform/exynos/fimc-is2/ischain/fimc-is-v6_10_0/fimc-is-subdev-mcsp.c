@@ -538,6 +538,7 @@ static int fimc_is_ischain_mxp_tag(struct fimc_is_subdev *subdev,
 		if (!COMPARE_CROP(incrop, &inparm) ||
 			!COMPARE_CROP(otcrop, &otparm) ||
 			change_pixelformat ||
+			test_bit(FIMC_IS_ISCHAIN_MODE_CHANGED, &device->state) ||
 			!test_bit(FIMC_IS_SUBDEV_RUN, &subdev->state) ||
 			test_bit(FIMC_IS_SUBDEV_FORCE_SET, &leader->state)) {
 			ret = fimc_is_ischain_mxp_start(device,
@@ -557,6 +558,7 @@ static int fimc_is_ischain_mxp_tag(struct fimc_is_subdev *subdev,
 				merr("fimc_is_ischain_mxp_start is fail(%d)", device, ret);
 				goto p_err;
 			}
+			clear_bit(FIMC_IS_ISCHAIN_MODE_CHANGED, &device->state);
 
 			mdbg_pframe("in_crop[%d, %d, %d, %d]\n", device, subdev, ldr_frame,
 				incrop->x, incrop->y, incrop->w, incrop->h);

@@ -300,10 +300,12 @@ static void ion_debug_buffer_for_heap(struct seq_file *s,
 				ARRAY_SIZE(heap_type_name)) ?
 				buffer->heap->type : 0;
 
-			ion_debug_print(s, "[%4d] %15s %8s %#5lx %8zu\n",
+			ion_debug_print(s, "[%4d] %15s %8s %#5lx %8zu %16s %16u (%16s %16u)\n",
 					buffer->id, buffer->heap->name,
 					heap_type_name[heaptype], buffer->flags,
-					buffer->size / SZ_1K);
+					buffer->size / SZ_1K,
+					buffer->task_comm, buffer->pid,
+					buffer->thread_comm, buffer->tid);
 
 			total += buffer->size;
 		}

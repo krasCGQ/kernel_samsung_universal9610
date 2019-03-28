@@ -505,19 +505,19 @@ void mms_input_event_handler(struct mms_ts_info *info, u8 sz, u8 *buf)
 			}
 		} else if (type == MIP4_EVENT_INPUT_TYPE_PROXIMITY) {
 			int hover_id;
+			int hover_state = 0;
 
 			for (hover_id = 1; hover_id < 4; hover_id++) {
-				hover = (packet[1] & (0x01 << (hover_id + 1)));
-				if (hover)
-					state = hover_id;
+				if (packet[1] & (0x01 << (hover_id + 1)))
+					hover_state = hover_id;
 			}
 
 			if (info->dtdata->support_ear_detect && info->ed_enable) {
 				if (info->ic_status >= LP_MODE) {
-					input_info(true, &client->dev, "%s: LPM : SKIP HOVER DETECT(%d)\n", __func__, state);
+					input_info(true, &client->dev, "%s: LPM : SKIP HOVER DETECT(%d)\n", __func__, hover_state);
 				} else {
-					input_info(true, &client->dev, "%s: HOVER DETECT(%d)\n", __func__, state);
-					input_report_abs(info->input_dev_proximity, ABS_MT_CUSTOM, state);
+					input_info(true, &client->dev, "%s: HOVER DETECT(%d)\n", __func__, hover_state);
+					input_report_abs(info->input_dev_proximity, ABS_MT_CUSTOM, hover_state);
 					input_sync(info->input_dev_proximity);
 				}
 			}
@@ -599,6 +599,11 @@ int mms_custom_event_handler(struct mms_ts_info *info, u8 *rbuf, u8 size)
 			} else if (gesture_id == MMS_GESTURE_ID_FOD_RELEASE) {
 				info->scrub_id = SPONGE_EVENT_TYPE_FOD_RELEASE;
 				input_info(true, &info->client->dev, "%s: FOD release\n", __func__);
+				input_report_key(info->input_dev, KEY_BLACK_UI_GESTURE, 1);
+				input_sync(info->input_dev);
+			} else if (gesture_id == MMS_GESTURE_ID_FOD_OUT) {
+				info->scrub_id = SPONGE_EVENT_TYPE_FOD_OUT;
+				input_info(true, &info->client->dev, "%s: FOD OUT\n", __func__);
 				input_report_key(info->input_dev, KEY_BLACK_UI_GESTURE, 1);
 				input_sync(info->input_dev);
 			}

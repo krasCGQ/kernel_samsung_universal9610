@@ -610,6 +610,7 @@ int gpu_dvfs_get_cur_clock(void)
 		mutex_unlock(&platform->gpu_clock_lock);
 	}
 #endif
+
 	return clock;
 }
 

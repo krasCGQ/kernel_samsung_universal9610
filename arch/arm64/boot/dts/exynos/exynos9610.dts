@@ -3221,7 +3221,7 @@
 		/* ranges; */
 		#dma-address-cells = <1>;
 		#dma-size-cells = <1>;
-		dma-window = <0x30000000 0xB0000000>;
+		dma-window = <0x40000000 0xA0000000>;
 
 		domain-clients = <&vipx>, <&vipx_vertex>;
 	};
@@ -3322,7 +3322,7 @@
 		g3d_genpd_name = "pd-g3d"; /*KC, RM: pd-g3d, LT,MK: pd-embedded_g3d*/
         #cooling-cells = <2>; /* min followed by max */
 		governor = "interactive";
-		interactive_info = <377000 94 0>;
+		interactive_info = <385000 94 0>;
 		gpu_dvfs_table_size = <11 7>; /*<row col>*/
 		/*  8 columns      freq  down   up  stay  mif    little  middle   big  */
 		gpu_dvfs_table = <  1053000    95  100   1  2093000 1534000       0

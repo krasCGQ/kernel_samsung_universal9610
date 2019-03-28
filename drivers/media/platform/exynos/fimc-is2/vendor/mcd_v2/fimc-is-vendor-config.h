@@ -13,6 +13,10 @@
 #ifndef FIMC_IS_VENDOR_CONFIG_H
 #define FIMC_IS_VENDOR_CONFIG_H
 
+#if defined(CONFIG_FIMC_IS_DDK_DATA_LOAD) || defined(CONFIG_SAMSUNG_PRODUCT_SHIP)
+#define USE_TZ_CONTROLLED_MEM_ATTRIBUTE
+#endif
+
 #if defined(CONFIG_CAMERA_VOGUE)
 #include "fimc-is-vendor-config_vogue.h"
 #elif defined(CONFIG_CAMERA_A50)

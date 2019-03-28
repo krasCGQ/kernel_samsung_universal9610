@@ -1284,8 +1284,15 @@ static void run_trx_short_test(void *device_data)
 	}
 
 	sec->cmd_state = SEC_CMD_STATUS_OK;
-	snprintf(result, sizeof(result), "RESULT=PASS");
-	sec_cmd_send_event_to_user(sec, test, result);
+
+	if (info->open_short_result == 1) {
+		snprintf(result, sizeof(result), "RESULT=PASS");
+		sec_cmd_send_event_to_user(sec, test, result);
+	} else {
+		snprintf(result, sizeof(result), "RESULT=FAIL");
+		sec_cmd_send_event_to_user(sec, test, result);
+	}
+
 	sec_cmd_set_cmd_result(sec, info->print_buf, strlen(info->print_buf));
 }
 
@@ -2059,8 +2066,8 @@ static ssize_t read_module_id_show(struct device *dev,
 	struct sec_cmd_data *sec = dev_get_drvdata(dev);
 	struct mms_ts_info *info = container_of(sec, struct mms_ts_info, sec);
 
-	return snprintf(buf, PAGE_SIZE, "ME%02X%02X%02X0000",
-		info->dtdata->panel, info->core_ver_ic, info->config_ver_ic);
+	return snprintf(buf, PAGE_SIZE, "ME%04x%04x",
+		info->fw_model_ver_ic, info->fw_ver_ic);
 }
 
 static ssize_t read_vendor_show(struct device *dev,

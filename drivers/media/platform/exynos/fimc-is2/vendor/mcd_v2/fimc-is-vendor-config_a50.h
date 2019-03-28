@@ -27,13 +27,14 @@
 /* Be enable this feature for New Model since A7 2018 */
 #define ENABLE_VRA_LIBRARY_IMPROVE
 
+#define USE_CAMERA_ACT_DRIVER_SOFT_LANDING 	    /* Using NRC based softlanding for DW-9808*/
 
 /***** DDK - DRIVER INTERFACE *****/
 #define USE_AI_CAMERA_INTERFACE     (1)           /* This feature since A7 2018 */
 #define USE_MFHDR_CAMERA_INTERFACE  (1)           /* This feature since A7 2018 */
 //#define USE_FACE_UNLOCK_AE_AWB_INIT               /* for Face Unlock */
 
-#define USE_CAMERA_ACT_DRIVER_SOFT_LANDING 	/* Using NRC based softlanding for DW-9808*/
+#define USE_BINARY_PADDING_DATA_ADDED             /* Apply Sign DDK/RTA Binary */
 
 /***** HW DEFENDANT DEFINE *****/
 //#define USE_COMMON_CAM_IO_PWR

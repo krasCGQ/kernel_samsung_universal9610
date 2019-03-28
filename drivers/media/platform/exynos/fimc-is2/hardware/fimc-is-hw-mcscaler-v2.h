@@ -213,8 +213,6 @@ struct fimc_is_hw_mcsc {
 
 	/* for full otf overflow recovery */
 	struct is_param_region	*back_param;
-	u32			back_lindex;
-	u32			back_hindex;
 };
 
 int fimc_is_hw_mcsc_probe(struct fimc_is_hw_ip *hw_ip, struct fimc_is_interface *itf,
@@ -223,7 +221,7 @@ void fimc_is_hw_mcsc_get_force_block_control(struct fimc_is_hw_ip *hw_ip, u32 ip
 	u32 *input_sel, bool *en);
 
 int fimc_is_hw_mcsc_update_param(struct fimc_is_hw_ip *hw_ip,
-	struct mcs_param *param, u32 lindex, u32 hindex, u32 instance);
+	struct mcs_param *param, u32 instance);
 void fimc_is_hw_mcsc_frame_done(struct fimc_is_hw_ip *hw_ip, struct fimc_is_frame *frame,
 	int done_type);
 int fimc_is_hw_mcsc_reset(struct fimc_is_hw_ip *hw_ip);
