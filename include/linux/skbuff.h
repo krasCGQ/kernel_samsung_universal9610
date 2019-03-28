@@ -804,6 +804,10 @@ struct sk_buff {
 	__u32		secmark;
 #endif
 
+#if defined(CONFIG_MODEM_IF_LEGACY_QOS) || defined(CONFIG_MODEM_IF_QOS)
+	__u32			priomark;
+#endif
+
 	union {
 		__u32		mark;
 		__u32		reserved_tailroom;

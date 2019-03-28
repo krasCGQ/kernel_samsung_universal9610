@@ -871,4 +871,24 @@ config INPUT_HISI_POWERKEY
 	  To compile this driver as a module, choose M here: the
 	  module will be called hisi_powerkey.
 
+config HALL
+    tristate "Enable HALL IC"
+    default n
+    help
+      Say Y here if you want to enable Hall IC Feature
+      and send a event when cover state is changed.
+      Active gpio state is low and active event value is 0.
+
+      If unsure, say N.
+
+config CERTIFY_HALL
+    tristate "Enable CERTIFY HALL IC"
+    default n
+    help
+      Say Y here if you want to enable Certify Hall IC Feature and
+      send a event when cover is detected.
+      Active gpio state is low and active event value is 1.
+
+      If unsure, say N.
+
 endif

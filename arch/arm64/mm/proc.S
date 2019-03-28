@@ -204,9 +204,15 @@ ENDPROC(idmap_cpu_replace_ttbr1)
 
 	.macro __idmap_kpti_put_pgtable_ent_ng, type
 	orr	\type, \type, #PTE_NG		// Same bit for blocks and pages
-	str	\type, [cur_\()\type\()p]	// Update the entry and ensure
-	dmb	sy				// that it is visible to all
-	dc	civac, cur_\()\type\()p		// CPUs.
+#ifdef CONFIG_UH_RKP
+	mov	x2, \type
+	mov	x1, cur_\()\type\()p
+	str	x2, [x1]	// Update the entry and ensure it
+#else
+	str	\type, [cur_\()\type\()p]	// Update the entry and ensure it
+#endif
+	dmb sy
+	dc	civac, cur_\()\type\()p		// is visible to all CPUs.
 	.endm
 
 /*

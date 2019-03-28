@@ -70,6 +70,8 @@ obj-$(CONFIG_CONNECTOR)		+= connector/
 obj-$(CONFIG_FB_I810)           += video/fbdev/i810/
 obj-$(CONFIG_FB_INTEL)          += video/fbdev/intelfb/
 
+obj-$(CONFIG_USE_MUIC)		+= muic/
+obj-$(CONFIG_IFCONN_MANAGER)    += ifconn/
 obj-$(CONFIG_PARPORT)		+= parport/
 obj-$(CONFIG_NVM)		+= lightnvm/
 obj-y				+= base/ block/ misc/ mfd/ nfc/
@@ -183,3 +185,26 @@ obj-$(CONFIG_FPGA)		+= fpga/
 obj-$(CONFIG_FSI)		+= fsi/
 obj-$(CONFIG_TEE)		+= tee/
 obj-$(CONFIG_MULTIPLEXER)	+= mux/
+
+obj-$(CONFIG_EXYNOS_BTS)	+= bts/
+obj-$(CONFIG_TRUSTONIC_TEE)     += gud/
+obj-$(CONFIG_BATTERY_SAMSUNG)     += battery_v2/
+obj-$(CONFIG_SWITCH)     	+= switch/
+obj-$(CONFIG_VBUS_NOTIFIER)	+= staging/samsung/sec_notifier/
+
+obj-$(CONFIG_VISION_SUPPORT)    += vision/
+
+# Fingerprint
+obj-$(CONFIG_SENSORS_FINGERPRINT) += fingerprint/
+
+#haptic driver
+obj-$(CONFIG_ANDROID_TIMED_OUTPUT)	+= motor/
+
+# Sensor Hub
+obj-$(CONFIG_SENSORS_SSP) += sensorhub/
+
+# FIVE TEE driver
+obj-$(CONFIG_FIVE_TEE_DRIVER)	+= five/
+
+# uH
+obj-$(CONFIG_UH)		+= uh/

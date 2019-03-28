@@ -33,6 +33,9 @@
 #include <linux/random.h>
 #include <linux/scatterlist.h>
 #include <linux/slab.h>
+#ifdef CONFIG_ECRYPTFS_FEK_INTEGRITY
+#include <crypto/hash.h>
+#endif
 #include "ecryptfs_kernel.h"
 
 /**
@@ -40,6 +43,40 @@
  * determine the type of error, make appropriate log entries, and
  * return an error code.
  */
+  #ifdef CONFIG_ECRYPTFS_FEK_INTEGRITY
+static int eCryptfs_hmac_sha256(u8 *key, u8 ksize, char *plaintext, u8 psize, u8 *output)
+{
+	struct crypto_shash *tfm;
+	int rc = 0;
+	if (!ksize || !psize)
+		return -EINVAL;
+	if (key == NULL || plaintext == NULL || output == NULL)
+		return -EINVAL;
+
+	tfm = crypto_alloc_shash("hmac(sha256)", 0, 0);
+	if (IS_ERR(tfm)) {
+		ecryptfs_printk(KERN_ERR, "crypto_alloc_ahash failed: err %ld", PTR_ERR(tfm));
+		return PTR_ERR(tfm);
+	}
+	rc = crypto_shash_setkey(tfm, key, ksize);
+	if (rc) {
+		ecryptfs_printk(KERN_ERR, "crypto_ahash_setkey failed: err %d", rc);
+	} else {
+		char desc[sizeof(struct shash_desc) +
+			crypto_shash_descsize(tfm)] CRYPTO_MINALIGN_ATTR;
+		struct shash_desc *shash = (struct shash_desc *)desc;
+
+		shash->tfm = tfm;
+		shash->flags = CRYPTO_TFM_REQ_MAY_SLEEP;
+
+		rc = crypto_shash_digest(shash, plaintext, psize,
+					  output);
+	}
+
+	crypto_free_shash(tfm);	
+	return rc;
+}
+#endif
 static int process_request_key_err(long err_code)
 {
 	int rc = 0;
@@ -1682,7 +1719,8 @@ decrypt_passphrase_encrypted_session_key(struct ecryptfs_auth_tok *auth_tok,
 	struct crypto_skcipher *tfm;
 	struct skcipher_request *req = NULL;
 	int rc = 0;
-
+	char *hash_key = NULL;
+	char *iv = NULL;
 	if (unlikely(ecryptfs_verbosity > 0)) {
 		ecryptfs_printk(
 			KERN_DEBUG, "Session key encryption key (size [%d]):\n",
@@ -1764,6 +1802,11 @@ decrypt_passphrase_encrypted_session_key(struct ecryptfs_auth_tok *auth_tok,
 	}
 out:
 	skcipher_request_free(req);
+	kfree(hash_key);
+	if (iv)
+		memset(iv, 0, ECRYPTFS_DEFAULT_IV_BYTES);
+	kfree(iv);
+
 	return rc;
 }
 
@@ -1805,7 +1848,18 @@ int ecryptfs_parse_packet_set(struct ecryptfs_crypt_stat *crypt_stat,
 	 * added the our &auth_tok_list */
 	next_packet_is_auth_tok_packet = 1;
 	while (next_packet_is_auth_tok_packet) {
-		size_t max_packet_size = ((PAGE_SIZE - 8) - i);
+		size_t max_packet_size;
+		if ((PAGE_SIZE - 8) < i) {
+			printk(KERN_WARNING "%s: Invalid max packet size\n", __func__);
+			rc = -EINVAL;
+			goto out;
+		}
+		if ((PAGE_SIZE - 8) < i) {
+			printk(KERN_WARNING "%s: Invalid max packet size\n", __func__);
+			rc = -EINVAL;
+			goto out;
+		}
+		max_packet_size = ((PAGE_SIZE - 8) - i);
 
 		switch (src[i]) {
 		case ECRYPTFS_TAG_3_PACKET_TYPE:
@@ -2220,7 +2274,6 @@ write_tag_3_packet(char *dest, size_t *remaining_bytes,
 	struct crypto_skcipher *tfm;
 	struct skcipher_request *req;
 	int rc = 0;
-
 	(*packet_size) = 0;
 	ecryptfs_from_hex(key_rec->sig, auth_tok->token.password.signature,
 			  ECRYPTFS_SIG_SIZE);
@@ -2295,6 +2348,17 @@ write_tag_3_packet(char *dest, size_t *remaining_bytes,
 		rc = -ENOMEM;
 		goto out;
 	}
+#ifdef CONFIG_ECRYPTFS_FEK_INTEGRITY
+	if(crypt_stat->flags & ECRYPTFS_ENABLE_HMAC) {
+		rc = eCryptfs_hmac_sha256(session_key_encryption_key, crypt_stat->key_size, 
+				crypt_stat->key, crypt_stat->key_size, crypt_stat->hash);
+		if (rc < 0) {
+			mutex_unlock(tfm_mutex);
+			ecryptfs_printk(KERN_ERR, "Error Generating Hash for FEK : rc = [%d]\n", rc);
+			goto out;
+		}
+	}
+#endif
 	rc = virt_to_scatterlist(key_rec->enc_key, key_rec->enc_key_size,
 				 dst_sg, 2);
 	if (rc < 1 || rc > 2) {

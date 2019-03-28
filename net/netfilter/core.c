@@ -469,6 +469,7 @@ int nf_hook_slow(struct sk_buff *skb, struct nf_hook_state *state,
 		case NF_ACCEPT:
 			break;
 		case NF_DROP:
+			DROPDUMP_QUEUE_SKB(skb, NET_DROPDUMP_NETFILTER_DROP);
 			kfree_skb(skb);
 			ret = NF_DROP_GETERR(verdict);
 			if (ret == 0)
@@ -479,6 +480,8 @@ int nf_hook_slow(struct sk_buff *skb, struct nf_hook_state *state,
 			if (ret == 1)
 				continue;
 			return ret;
+		case NF_STOLEN:
+			DROPDUMP_QUEUE_SKB(NULL, NET_DROPDUMP_NETFILTER_STOLEN);
 		default:
 			/* Implicit handling for NF_STOLEN, as well as any other
 			 * non conventional verdicts.

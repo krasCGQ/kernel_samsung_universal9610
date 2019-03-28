@@ -76,6 +76,9 @@
 #include <uapi/linux/sched/types.h>
 #include "binder_alloc.h"
 #include "binder_trace.h"
+#ifdef CONFIG_SAMSUNG_FREECESS
+#include <linux/freecess.h>
+#endif
 
 static HLIST_HEAD(binder_deferred_list);
 static DEFINE_MUTEX(binder_deferred_lock);
@@ -787,6 +790,98 @@ _binder_node_inner_unlock(struct binder_node *node, int line)
 		binder_inner_proc_unlock(proc);
 	spin_unlock(&node->lock);
 }
+
+#ifdef CONFIG_DEBUG_SNAPSHOT_BINDER
+/*
+ * Binder Debug Snapshot
+ */
+static void init_binder_transaction_base(int type, struct trace_binder_transaction_base *base,
+					 struct binder_transaction *t, struct binder_thread *from,
+					 struct binder_thread *to)
+{
+	struct binder_thread *t_from;
+	struct binder_thread *t_to;
+
+	if (base == NULL)
+		return;
+
+	t_from = t->from ? t->from : (from ? from : NULL);
+	t_to = t->to_thread ? t->to_thread : (to ? to : NULL);
+	base->trace_type = type;
+	base->transaction_id = t->debug_id;
+	base->from_pid = t_from ? t_from->proc->pid : 0;
+	base->from_tid = t_from ? t_from->pid : 0;
+	base->to_pid = t->to_proc ? t->to_proc->pid : 0;
+	base->to_tid = t_to ? t_to->pid : 0;
+	if (t_from) {
+		strncpy(base->from_pid_comm, t_from->proc->tsk->comm, TASK_COMM_LEN);
+		strncpy(base->from_tid_comm, t_from->task->comm, TASK_COMM_LEN);
+	} else {
+		base->from_pid_comm[0] = '\0';
+		base->from_tid_comm[0] = '\0';
+	}
+	if (t->to_proc)
+		strncpy(base->to_pid_comm, t->to_proc->tsk->comm, TASK_COMM_LEN);
+	else
+		base->to_pid_comm[0] = '\0';
+	if (t_to)
+		strncpy(base->to_tid_comm, t_to->task->comm, TASK_COMM_LEN);
+	else
+		base->to_tid_comm[0] = '\0';
+}
+
+static void dss_binder_transaction(int reply, struct binder_transaction *t, struct binder_thread *from, int to_node_id)
+{
+	struct trace_binder_transaction_base base;
+	struct trace_binder_transaction transaction;
+
+	init_binder_transaction_base(TRANSACTION, &base, t, from, NULL);
+	transaction.to_node_id = to_node_id;
+	transaction.reply = reply;
+	transaction.flags = t->flags;
+	transaction.code = t->code;
+
+	dbg_snapshot_binder(&base, &transaction, NULL);
+}
+
+static void dss_binder_transaction_received(struct binder_transaction *t, struct binder_thread *to)
+{
+	struct trace_binder_transaction_base base;
+
+	init_binder_transaction_base(TRANSACTION_DONE, &base, t, NULL, to);
+
+	dbg_snapshot_binder(&base, NULL, NULL);
+}
+
+static void dss_binder_transaction_failed(int reply, struct binder_transaction_log_entry *e,
+					  char *from_pid_comm, char *from_tid_comm,
+					  unsigned int flags, unsigned int code)
+{
+	struct trace_binder_transaction_base base;
+	struct trace_binder_transaction transaction;
+	struct trace_binder_transaction_error error;
+
+	base.trace_type = TRANSACTION_ERROR;
+	base.transaction_id = e->debug_id;
+	base.from_pid = e->from_proc;
+	base.from_tid = e->from_thread;
+	base.to_pid = e->to_proc;
+	base.to_tid = e->to_thread;
+	strncpy(base.from_pid_comm, from_pid_comm, TASK_COMM_LEN);
+	strncpy(base.from_tid_comm, from_tid_comm, TASK_COMM_LEN);
+	base.to_pid_comm[0] = '\0';
+	base.to_tid_comm[0] = '\0';
+	transaction.to_node_id = e->to_node;
+	transaction.reply = reply;
+	transaction.flags = flags;
+	transaction.code = code;
+	error.return_error = e->return_error;
+	error.return_error_param = e->return_error_param;
+	error.return_error_line = e->return_error_line;
+
+	dbg_snapshot_binder(&base, &transaction, &error);
+}
+#endif /* CONFIG_DEBUG_SNAPSHOT_BINDER */
 
 static bool binder_worklist_empty_ilocked(struct list_head *list)
 {
@@ -3013,7 +3108,15 @@ static void binder_transaction(struct binder_proc *proc,
 			goto err_dead_binder;
 		}
 		e->to_node = target_node->debug_id;
-		if (security_binder_transaction(proc->tsk,
+#ifdef CONFIG_SAMSUNG_FREECESS
+                if (target_proc
+                        && (target_proc->tsk->cred->euid.val > 10000)
+                        && (proc->pid != target_proc->pid)) {
+                        binder_report(proc->tsk, target_proc->tsk, tr->flags & TF_ONE_WAY);
+                }
+#endif
+
+                if (security_binder_transaction(proc->tsk,
 						target_proc->tsk) < 0) {
 			return_error = BR_FAILED_REPLY;
 			return_error_param = -EPERM;
@@ -3120,6 +3223,9 @@ static void binder_transaction(struct binder_proc *proc,
 		t->priority = target_proc->default_priority;
 	}
 
+#ifdef CONFIG_DEBUG_SNAPSHOT_BINDER
+	dss_binder_transaction(reply, t, t->from ? t->from : thread, target_node ? target_node->debug_id : 0);
+#endif
 	trace_binder_transaction(reply, t, target_node);
 
 	t->buffer = binder_alloc_new_buf(&target_proc->alloc, tr->data_size,
@@ -3438,6 +3544,9 @@ err_invalid_target_handle:
 		e->return_error = return_error;
 		e->return_error_param = return_error_param;
 		e->return_error_line = return_error_line;
+#ifdef CONFIG_DEBUG_SNAPSHOT_BINDER
+		dss_binder_transaction_failed(reply, e, proc->tsk->comm, thread->task->comm, tr->flags, tr->code);
+#endif
 		fe = binder_transaction_log_add(&binder_transaction_log_failed);
 		*fe = *e;
 		/*
@@ -4305,6 +4414,9 @@ retry:
 		}
 		ptr += sizeof(tr);
 
+#ifdef CONFIG_DEBUG_SNAPSHOT_BINDER
+		dss_binder_transaction_received(t, thread);
+#endif
 		trace_binder_transaction_received(t);
 		binder_stat_br(proc, thread, cmd);
 		binder_debug(BINDER_DEBUG_TRANSACTION,
@@ -5456,6 +5568,81 @@ static void print_binder_proc(struct seq_file *m,
 	if (!print_all && m->count == header_pos)
 		m->count = start_pos;
 }
+
+#ifdef CONFIG_SAMSUNG_FREECESS
+static void binder_in_transaction(struct binder_proc *proc)
+{
+	struct rb_node *n = NULL;
+	struct binder_thread *thread = NULL;
+	int uid = -1;
+	struct task_struct *tsk = NULL;
+	struct binder_transaction *t = NULL;
+	bool empty = true;
+	bool found = false;
+
+	//check binder threads todo and transcation_stack list
+	binder_inner_proc_lock(proc);
+	for (n = rb_first(&proc->threads); n != NULL; n = rb_next(n)) {
+		thread = rb_entry(n, struct binder_thread, rb_node);
+		empty = binder_worklist_empty_ilocked(&thread->todo);
+		tsk = thread->task;
+
+		if (tsk != NULL) {
+			//have some binders to do
+			if (!empty) {
+				//report uid to FW, only report one time
+				uid = tsk->cred->euid.val;
+				binder_inner_proc_unlock(proc);
+				cfb_report(uid, "thread");
+				return;
+			}
+
+			//processing one binder call
+			t = thread->transaction_stack;
+			if (t) {
+				spin_lock(&t->lock);
+				if (t->to_thread == thread) {
+					//check incoming, it has one
+					found = true;
+					uid = tsk->cred->euid.val;
+				}
+				spin_unlock(&t->lock);
+				if (found == true){
+					//report uid to FW, only report one time
+					binder_inner_proc_unlock(proc);
+					cfb_report(uid, "transaction_stack");
+					return;
+				}
+			}
+		}
+	}
+
+	//check binder proc todo list
+	empty = binder_worklist_empty_ilocked(&proc->todo);
+	tsk = proc->tsk;
+	if (tsk != NULL && !empty) {
+		//report uid to FW
+		uid = tsk->cred->euid.val;
+		binder_inner_proc_unlock(proc);
+		cfb_report(uid, "proc");
+	}
+	else
+		binder_inner_proc_unlock(proc);
+}
+
+void binders_in_transcation(int uid)
+{
+	struct binder_proc *itr;
+
+	mutex_lock(&binder_procs_lock);
+	hlist_for_each_entry(itr, &binder_procs, proc_node) {
+		if (itr != NULL && (itr->tsk->cred->euid.val == uid)) {
+			binder_in_transaction(itr);
+		}
+	}
+	mutex_unlock(&binder_procs_lock);
+}
+#endif
 
 static const char * const binder_return_strings[] = {
 	"BR_ERROR",

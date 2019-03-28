@@ -1,9 +1,11 @@
 # SPDX-License-Identifier: GPL-2.0
-dtb-$(CONFIG_ARCH_EXYNOS) += \
-	exynos5433-tm2.dtb	\
-	exynos5433-tm2e.dtb	\
-	exynos7-espresso.dtb
+dtb-y += exynos9610.dtb
+dtbo-y += exynos9610-a50_swa_open_00.dtbo
+dtbo-y += exynos9610-a50_swa_open_01.dtbo
+dtbo-y += exynos9610-a50_swa_open_02.dtbo
+dtbo-y += exynos9610-a50_swa_open_03.dtbo
+dtbo-y += exynos9610-a50_swa_open_04.dtbo
+dtbo-y += exynos9610-a50_swa_open_06.dtbo
 
-always		:= $(dtb-y)
-subdir-y	:= $(dts-dirs)
-clean-files	:= *.dtb
+always            := $(dtb-y) $(dtbo-y)
+clean-files       := *.dtb*
